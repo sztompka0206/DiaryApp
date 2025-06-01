@@ -8,10 +8,12 @@
 import SwiftUI
 
 @main
-struct DiaryAppApp: App {
+struct DiaryApp: App {
+    @StateObject private var viewModel = DiaryViewModel()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView() // タブビューを使う場合はこちらを有効にする
         }
     }
 }

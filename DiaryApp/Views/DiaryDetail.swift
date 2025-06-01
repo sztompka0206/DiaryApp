@@ -38,15 +38,14 @@ struct DiaryDetailView: View {
             if isEditing {
                 Button(action: toggleEdit) {
                     Text("保存")
-                    .fontWeight(.bold)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                    .shadow(radius: 6)
+                        .font(.headline.bold())          // サイズ感を headline に統一
+                        .foregroundColor(.white)         // 文字色
+                        .padding(.vertical, 10)          // 上下だけ余白
+                        .padding(.horizontal, 32)        // ← “保存” + 32pt
+                        .background(Color.blue)          // 背景色
+                        .cornerRadius(12)                // 角丸
+                        .shadow(radius: 4)               // 控えめな影
                 }
-                .padding(.horizontal, 50)
                 .padding()
             }
             

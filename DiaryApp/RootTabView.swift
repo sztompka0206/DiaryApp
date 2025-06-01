@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct RootTabView: View {
-    @StateObject private var vm = DiaryViewModel()      // 全タブ共通の ViewModel
+    @StateObject private var vm    = DiaryViewModel()
+    @StateObject private var fs    = FontSettings()
+    @StateObject private var theme = ThemeSettings()
     
     var body: some View {
         TabView {
             // ───────── 1) ホーム ─────────
             NavigationStack {
-                HomeContentView(viewModel: vm)           // ← 旧 HomeView のリスト部分
+                HomeContentView(viewModel: vm)
             }
             .tabItem {
                 Image(systemName: "house")
@@ -52,6 +54,25 @@ struct RootTabView: View {
                     .accessibilityLabel("Account")
             }
         }
+        .environmentObject(vm)
+        .environmentObject(fs)
+        .environmentObject(theme)
+        // ★ 追加：Picker で選んだフォントを全ビューへ流す
+        .environment(\.font, globalFont(for: fs))
+        // 既存のテーマ切り替え
+        .preferredColorScheme(theme.selected.colorScheme)
+    }
+    
+    /// 選択フォント → SwiftUI.Font へ変換
+    private func globalFont(for fs: FontSettings) -> Font {
+        if fs.selectedFontName.isEmpty {
+            return .body                       // システムフォント
+        } else {
+            return .custom(
+                fs.selectedFontName,
+                size: UIFont.preferredFont(forTextStyle: .body).pointSize,
+                relativeTo: .body              // Dynamic Type 対応
+            )
+        }
     }
 }
-

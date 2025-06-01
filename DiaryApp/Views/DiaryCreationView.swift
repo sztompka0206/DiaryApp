@@ -36,15 +36,14 @@ struct DiaryCreationView: View {
             
             Button(action: saveEntry) {
                 Text("保存")
-                    .fontWeight(.bold)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)  // ボタンの背景色を変更
-                    .foregroundColor(.white)  // 文字色を白に設定
-                    .cornerRadius(12)  // 丸みを持たせる
-                    .shadow(radius: 6)  // 影をつけて浮き上がる効果を持たせる
+                    .font(.headline.bold())          // サイズ感を headline に統一
+                    .foregroundColor(.white)         // 文字色
+                    .padding(.vertical, 10)          // 上下だけ余白
+                    .padding(.horizontal, 32)        // ← “保存” + 32pt
+                    .background(Color.blue)          // 背景色
+                    .cornerRadius(12)                // 角丸
+                    .shadow(radius: 4)               // 控えめな影
             }
-            .padding(.horizontal, 50)  // 横の余白を広めに設定
             .padding()
             .alert(isPresented: $showAlert) {  // アラートの表示
                 Alert(
@@ -56,7 +55,7 @@ struct DiaryCreationView: View {
             
             Spacer()
         }
-        .navigationBarTitle("日記を書こう", displayMode: .inline)
+        .navigationBarTitle("日記を作成", displayMode: .inline)
     }
     
     private func saveEntry() {

@@ -21,42 +21,43 @@ struct HomeContentView: View {
     // MARK: - Body
     // ------------------------------------
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // ───────── 検索バー ─────────
-                SearchBar(text: $searchText)
+        VStack(spacing: 0) {
+            // ───────── 検索バー ─────────
+            SearchBar(text: $searchText)
+                .padding(.bottom, 12)
                 
-                // ───────── 日記リスト ─────────
-                List {
-                    ForEach(
-                        viewModel.diaryEntries.filter { entry in
-                            searchText.isEmpty ||
-                            entry.title.contains(searchText) ||
-                            entry.content.contains(searchText)
-                        }
-                    ) { entry in
-                        NavigationLink {
-                            DiaryDetailView(viewModel: viewModel, entry: entry)
-                        } label: {
-                            VStack(alignment: .leading) {
-                                Text(entry.title)
-                                    .font(headlineFont)        // ← カスタムに差し替え
-                                
-                                Text(entry.content)
-                                    .lineLimit(3)
-                                    .font(bodyFont)            // ← カスタムに差し替え
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(.vertical, 8)
-                        }
+            // ───────── 日記リスト ─────────
+            List {
+                ForEach(
+                    viewModel.diaryEntries.filter { entry in
+                        let keyword = searchText.lowercased()
+                        return keyword.isEmpty ||
+                        entry.title.lowercased().contains(keyword) ||
+                        entry.content.lowercased().contains(keyword)
                     }
-                    .onDelete(perform: deleteEntry)
+                ) { entry in
+                    NavigationLink {
+                        DiaryDetailView(viewModel: viewModel, entry: entry)
+                    } label: {
+                        VStack(alignment: .leading) {
+                            Text(entry.title)
+                                .font(headlineFont)        // ← カスタムに差し替え
+                                .bold()
+                                .padding(.bottom, 1)
+                                
+                            Text(entry.content)
+                                .lineLimit(3)
+                                .font(bodyFont)            // ← カスタムに差し替え
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.vertical, 6)
+                    }
                 }
-                .listStyle(.plain)
+                .onDelete(perform: deleteEntry)
             }
-            .navigationTitle("日記リスト")
-            
+            .listStyle(.plain)
         }
+        .navigationTitle("日記リスト")
     }
     
     // ------------------------------------
@@ -99,10 +100,17 @@ struct SearchBar: View {
     @Binding var text: String
     
     var body: some View {
-        TextField("検索", text: $text)
-            .padding(7)
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(12)
-            .padding([.top, .horizontal])
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField("", text: $text)
+                .disableAutocorrection(true)
+                .textInputAutocapitalization(.never)
+        }
+        .padding(8)                                   // 内側余白
+        .background(Color.gray.opacity(0.12))         // 背景色
+        .cornerRadius(12)                             // 角丸
+        .padding([.top,.horizontal])
     }
 }

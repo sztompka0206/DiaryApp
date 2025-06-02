@@ -22,11 +22,19 @@ final class FontSettings: ObservableObject {
     
     // MARK: - Font candidates  —— 表示名と PostScript 名のペア
     let fontCandidates: [(display: String, postScript: String)] = [
-        ("System",          ""),
-        ("Avenir Next",     "AvenirNext-Regular"),
-        ("Helvetica Neue",  "HelveticaNeue"),
-        ("Georgia",         "Georgia"),
-        ("Courier New",     "CourierNewPSMT")
+        ("System",             ""),
+        ("Hannotate SC",       "HannotateSC-W5"),        // ← やわらかく自然な手書き感
+        ("HanziPen SC",        "HanziPenSC-W5"),         // ← もっと丸っこい手書き
+        ("Hiragino Sans",      "HiraginoSans-W3"),       // ← モダンで読みやすい
+        ("Hiragino Mincho",    "HiraMinProN-W3"),        // ← 落ち着いた明朝体
+        ("Yu Mincho",          "YuMin-Medium"),          // ← クラシックな日記にも
+        ("Noto Sans CJK JP",  "NotoSansCJKjp-Regular"), // ← Google フォント
+        ("Noto Serif CJK JP", "NotoSerifCJKjp-Regular"), // ← Google フォント
+        ("HiraKakuProN-W3", "HiraKakuProN-W3"), // ← 角ゴシック
+        ("HiraMaruProN-W4", "HiraMaruProN-W4"), // ← 丸ゴシック
+        ("Kaiti SC", "KaitiSC-Regular"), // ← 楷書体
+        ("PingFang SC", "PingFangSC-Regular"), // ← 微軟正黑體
+        
     ]
     
     // MARK: - Init
@@ -46,20 +54,14 @@ final class FontSettings: ObservableObject {
                    ?? UIFont.preferredFont(forTextStyle: .headline)
         }()
         
-//        let largeUIFont: UIFont = {
-//            if ps.isEmpty { return UIFont.preferredFont(forTextStyle: .largeTitle) }
-//            return UIFont(name: ps,
-//                          size: UIFont.preferredFont(forTextStyle: .largeTitle).pointSize)
-//                   ?? UIFont.preferredFont(forTextStyle: .largeTitle)
-//        }()
         let baseLarge = UIFont.preferredFont(forTextStyle: .largeTitle)
         let largeUIFont: UIFont = {
             if ps.isEmpty {                      // システムフォント
                 return UIFontMetrics(forTextStyle: .largeTitle)
-                       .scaledFont(for: baseLarge.withSize(baseLarge.pointSize * 0.9))
+                       .scaledFont(for: baseLarge.withSize(baseLarge.pointSize * 0.7))
             }
             // カスタムフォント
-            let size = baseLarge.pointSize * 0.9
+            let size = baseLarge.pointSize * 0.7
             return UIFont(name: ps, size: size)
                    ?? baseLarge
         }()

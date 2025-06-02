@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DiaryEntry: Identifiable, Codable{
+struct DiaryEntry: Identifiable, Codable, Equatable{
     var id = UUID()
     var title: String
     var content: String

@@ -17,6 +17,7 @@ struct RootTabView: View {
             // ───────── 1) ホーム ─────────
             NavigationStack {
                 HomeContentView(viewModel: vm)
+                    .applyTheme()
             }
             .tabItem {
                 Image(systemName: "house")
@@ -29,6 +30,7 @@ struct RootTabView: View {
                     viewModel: vm,
                     selectedDate: .constant(Date())
                 )
+                .applyTheme()
             }
             .tabItem {
                 Image(systemName: "calendar")
@@ -38,6 +40,7 @@ struct RootTabView: View {
             // ───────── 3) 新規作成 ─────────
             NavigationStack {
                 DiaryCreationView(viewModel: vm)
+                    .applyTheme()
             }
             .tabItem {
                 Image(systemName: "plus")
@@ -48,6 +51,7 @@ struct RootTabView: View {
             NavigationStack {
                 AccountView()
                     .environmentObject(vm)
+                    .applyTheme()
             }
             .tabItem {
                 Image(systemName: "person")
@@ -61,6 +65,12 @@ struct RootTabView: View {
         .environment(\.font, globalFont(for: fs))
         // 既存のテーマ切り替え
         .preferredColorScheme(theme.selected.colorScheme)
+        .background(
+            theme.selected == .sepia ? Color("SepiaBackground") : Color.clear
+        )
+        .foregroundColor(
+            theme.selected == .sepia ? Color("SepiaText") : nil
+        )
     }
     
     /// 選択フォント → SwiftUI.Font へ変換

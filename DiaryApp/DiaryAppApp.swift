@@ -9,11 +9,17 @@ import SwiftUI
 
 @main
 struct DiaryApp: App {
-    @StateObject private var viewModel = DiaryViewModel()
-    
+    init() {
+        // List を透明化 ── これは 1 度だけでよい
+        let clear = UIColor.clear
+        UITableView.appearance().backgroundColor     = clear
+        UITableView.appearance().isOpaque            = false
+        UITableViewCell.appearance().backgroundColor = clear
+        let bg = UIView(); bg.backgroundColor = .clear
+        UITableViewCell.appearance().selectedBackgroundView = bg
+    }
+
     var body: some Scene {
-        WindowGroup {
-            RootTabView() // タブビューを使う場合はこちらを有効にする
-        }
+        WindowGroup { RootTabView() }
     }
 }

@@ -8,9 +8,9 @@
 import SwiftUI
 import UIKit
 
-//────────────────────────────────────────────
-// MARK: - Font.TextStyle ↔︎ UIFont.TextStyle
-//────────────────────────────────────────────
+// ────────────────────────────────────────────
+// MARK: - UIFont ⇄ Font 変換
+// ────────────────────────────────────────────
 private extension Font.TextStyle {
     var uiKit: UIFont.TextStyle {
         switch self {
@@ -30,83 +30,127 @@ private extension Font.TextStyle {
     }
 }
 
-//────────────────────────────────────────────
+// ────────────────────────────────────────────
+// MARK: - テーマ連動 Filled ボタンスタイル
+// ────────────────────────────────────────────
+struct FilledThemedButton: ButtonStyle {
+    @EnvironmentObject var theme: ThemeSettings
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundColor(theme.selected.buttonTextColor)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 32)
+            .background(
+                theme.selected.accentColor.opacity(configuration.isPressed ? 0.7 : 1.0)
+            )
+            .cornerRadius(12)
+    }
+}
+
+// ────────────────────────────────────────────
 // MARK: - DiaryDetailView
-//────────────────────────────────────────────
+// ────────────────────────────────────────────
 struct DiaryDetailView: View {
     // 依存
     @ObservedObject var viewModel: DiaryViewModel
-    @State var entry: DiaryEntry               // 編集用コピー
-    @EnvironmentObject private var fontSettings: FontSettings
-    @State private var isEditing = false
+    @State var entry: DiaryEntry                 // 編集用コピー
     
-    //────────────────────────────────────────
-    // MARK: - Body
-    //────────────────────────────────────────
+    @EnvironmentObject private var fontSettings: FontSettings
+    @EnvironmentObject private var theme: ThemeSettings
+    
+    // UI 状態
+    @State private var isEditing = false
+    @State private var draft: DiaryEntry? = nil  // キャンセル用バックアップ
+    @State private var showSaved = false         // 保存完了アラート
+    
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 16) {
             // ───── タイトル ─────
-            TextField("タイトル", text: $entry.title)
-                .font(customFont(.title2).bold())
-                .padding(.top, 20)
+            TextField("タイトル（例: 2025/06/09）", text: $entry.title)
+                .font(inputFont(for: .headline).weight(.bold))
+                .textFieldStyle(.plain)
+                .padding(.horizontal)
+                .padding(.top, 16)
                 .disabled(!isEditing)
             
             // ───── 本文 ─────
             if isEditing {
                 TextEditor(text: $entry.content)
-                    .font(customFont(.body))
-                    .padding()
-                    .border(Color.gray, width: 1)
+                    .font(inputFont(for: .body))
+                    .padding(.horizontal)
+                    .frame(minHeight: 240)
+                    .background(Color.clear)
+                    .scrollContentBackground(.hidden)
             } else {
                 ScrollView {
                     Text(entry.content)
-                        .font(customFont(.body))
-                        .padding()
+                        .font(inputFont(for: .body))
+                        .padding(.horizontal)
+                        .padding(.top, 4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             
-            // ───── 保存ボタン (編集時のみ) ─────
+            // ───── 保存ボタン ─────
             if isEditing {
-                Button(action: toggleEdit) {
-                    Text("保存")
-                        .font(customFont(.headline).bold())
-                        .foregroundColor(.white)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 32)
-                        .background(Color.blue)
-                        .cornerRadius(12)
-                        .shadow(radius: 4)
+                HStack {
+                    Spacer()
+                    Button("保存", action: saveEntry)
+                        .buttonStyle(FilledThemedButton())
+                    Spacer()
                 }
-                .padding()
+                .padding(.top, 8)
             }
             
             Spacer()
         }
-        .navigationBarTitle("日記詳細", displayMode: .inline)
-        .navigationBarItems(trailing: Button(action: toggleEdit) {
-            Text(isEditing ? "キャンセル" : "編集")
-                .font(customFont(.body))
-                .foregroundColor(.blue)
-        })
+        .background(theme.selected.backgroundColor.ignoresSafeArea())
+        .navigationTitle("日記詳細")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if isEditing {
+                    Button("キャンセル", action: cancelEdit)
+                        .font(inputFont(for: .body))
+                } else {
+                    Button("編集", action: startEdit)
+                        .font(inputFont(for: .body))
+                }
+            }
+        }
+        .alert("完了", isPresented: $showSaved) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("日記を保存しました！")
+        }
     }
     
-    //────────────────────────────────────────
-    // MARK: - Helpers
-    //────────────────────────────────────────
-    /// FontSettings に合わせて Font を生成
-    private func customFont(_ style: Font.TextStyle) -> Font {
+    // ────────────────────────────
+    // MARK: - 編集モード制御
+    // ────────────────────────────
+    private func startEdit() {
+        draft = entry                               // バックアップ
+        isEditing = true
+    }
+    
+    private func saveEntry() {
+        viewModel.saveDiaryEntry(entry)
+        isEditing = false
+        showSaved = true
+    }
+    
+    private func cancelEdit() {
+        if let draft { entry = draft }              // 元に戻す
+        isEditing = false
+    }
+    
+    // ────────────────────────────
+    // MARK: - Font Helper
+    // ────────────────────────────
+    private func inputFont(for style: Font.TextStyle) -> Font {
         let ps = fontSettings.selectedFontName
         guard !ps.isEmpty else { return .system(style) }
-        
         let size = UIFont.preferredFont(forTextStyle: style.uiKit).pointSize
         return .custom(ps, size: size, relativeTo: style)
-    }
-    
-    /// 編集モード切替と保存
-    private func toggleEdit() {
-        if isEditing {
-            viewModel.saveDiaryEntry(entry)       // 保存
-        }
-        isEditing.toggle()
     }
 }

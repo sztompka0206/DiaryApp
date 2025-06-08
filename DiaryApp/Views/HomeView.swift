@@ -10,8 +10,8 @@ import SwiftUI
 struct HomeContentView: View {
     // 画面全体で共有する ViewModel
     @ObservedObject var viewModel: DiaryViewModel
-    // 選択フォントに応じて動的に Font を返すために参照
     @EnvironmentObject private var fontSettings: FontSettings
+    @EnvironmentObject private var theme: ThemeSettings
     
     // --- UI State ---
     @State private var searchText: String = ""
@@ -52,10 +52,12 @@ struct HomeContentView: View {
                         }
                         .padding(.vertical, 6)
                     }
+                    .listRowBackground(Color.clear)
                 }
                 .onDelete(perform: deleteEntry)
             }
             .listStyle(.plain)
+            .background(theme.selected.backgroundColor)
         }
         .navigationTitle("日記リスト")
     }
@@ -104,7 +106,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
             
-            TextField("", text: $text)
+            TextField("検索", text: $text)
                 .disableAutocorrection(true)
                 .textInputAutocapitalization(.never)
         }

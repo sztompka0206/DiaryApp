@@ -64,7 +64,15 @@ struct AccountView: View {
                 }
             }
         }
-        .navigationTitle("マイページ")
+        .if(theme.selected == .sepia) { view in        // ◎ セピアのときだけ
+            view
+                .scrollContentBackground(.hidden)      //  Form 背景を透過
+                .background(                           //  自前のセピア色を敷く
+                    theme.selected.backgroundColor
+                        .ignoresSafeArea()
+                )
+        }
+        .navigationBarTitle("マイページ")
         .alert("PDF 生成に失敗しました", isPresented: $showAlert) {
             Button("OK", role: .cancel) { }
         }
@@ -74,13 +82,6 @@ struct AccountView: View {
 // MARK: - 行ごとに切り出した軽量サブビュー
 
 /// フォント候補 1 行
-//private struct FontRowView: View {
-//    let name: String
-//    var body: some View {
-//        Text(name.isEmpty ? "システムフォント" : name)
-//            .font(name.isEmpty ? .body : .custom(name, size: 17))
-//    }
-//}
 struct FontRow: View {
     let candidate: (display: String, postScript: String)
     
@@ -100,12 +101,22 @@ struct FontRow: View {
 /// テーマ候補 1 行
 private struct ThemeRowView: View {
     let mode: ThemeSettings.Theme
+    
     var body: some View {
         let icon = switch mode {
         case .system: "iphone"
         case .light:  "sun.max"
         case .dark:   "moon"
+        case .sepia:  "book.closed"  // ← 追加：クラシックテーマ用アイコン
         }
-        Label(mode.label, systemImage: mode.symbolName)
+        Label(mode.label, systemImage: icon)
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func `if`<V: View>(_ cond: Bool,
+                       transform: (Self) -> V) -> some View {
+        cond ? AnyView(transform(self)) : AnyView(self)
     }
 }

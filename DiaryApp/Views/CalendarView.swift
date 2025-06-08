@@ -38,6 +38,7 @@ struct CalendarView: View {
     @ObservedObject var viewModel: DiaryViewModel
     @Binding var selectedDate: Date
     @EnvironmentObject private var fontSettings: FontSettings   // フォント設定共有
+    @EnvironmentObject private var theme: ThemeSettings         // テーマ設定共有
     
     // 日付処理
     private let cal = Calendar.current
@@ -157,8 +158,10 @@ struct CalendarView: View {
                 .padding(.vertical, 6)
                 .onTapGesture { sheetEntry = entry }   // 行タップでモーダル
             }
+            .listRowBackground(Color.clear)
         }
         .listStyle(.plain)
+        .background(theme.selected.backgroundColor)
         .clipped()
     }
     
